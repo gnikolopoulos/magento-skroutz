@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <tabs>
+        <id>
+            <label>Skroutz Feed</label>
+            <sort_order>195</sort_order>
+        </id>
+    </tabs>
+
+    <sections>
+        <feed translate="label" module="feed">
+            <label>Skroutz Feed Options</label>
+            <tab>id</tab>
+            <frontend_type>text</frontend_type>
+            <sort_order>100</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>  
+            <groups>
+                <feed translate="label">
+                    <label>General Configuration</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>101</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <xml_file_name translate="label">
+                            <label>XML filename</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </xml_file_name>
+
+                        <feed_path translate="label">
+                            <label>Feed path</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </feed_path>
+
+                        <excluded_cats translate="label">
+                            <label>Excluded Categories</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </excluded_cats>
+                    </fields>
+                </feed>
+            </groups>
+        </feed>
+    </sections>
+</config>

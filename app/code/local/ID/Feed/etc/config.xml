@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+  <config>
+    <modules>
+      <ID_Feed>
+        <version>0.0.1</version>
+      </ID_Feed>
+    </modules>
+
+    <frontend>
+      <routers>
+        <feed>
+          <use>standard</use>
+          <args>
+            <module>ID_Feed</module>
+            <frontName>feed</frontName>
+          </args>
+        </feed>
+      </routers>
+    </frontend>
+      
+    <global>
+      <helpers>
+        <feed>
+          <class>ID_Feed_Helper</class>
+        </feed>
+      </helpers>
+    </global>
+  </config>
