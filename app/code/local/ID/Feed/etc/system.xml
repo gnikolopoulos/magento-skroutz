@@ -25,24 +25,31 @@
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
+                        <store_name translate="label">
+                            <label>Store name parameter</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </store_name>
+
                         <xml_file_name translate="label">
                             <label>XML filename</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>1</sort_order>
+                            <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
                         </xml_file_name>
 
                         <feed_path translate="label">
                             <label>Feed path</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>1</sort_order>
+                            <sort_order>3</sort_order>
                             <show_in_default>1</show_in_default>
                         </feed_path>
 
                         <excluded_cats translate="label">
                             <label>Excluded Categories</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>1</sort_order>
+                            <sort_order>4</sort_order>
                             <show_in_default>1</show_in_default>
                         </excluded_cats>
                     </fields>

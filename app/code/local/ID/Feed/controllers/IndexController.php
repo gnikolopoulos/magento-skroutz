@@ -5,6 +5,7 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
   private $oProducts;
   private $oProdudctIds;
   private $oProductModel;
+  private $name = Mage::getStoreConfig('feed/feed/store_name');
   private $xml_file_name = Mage::getStoreConfig('feed/feed/xml_file_name');
   private $xml_path = Mage::getStoreConfig('feed/feed/feed_path');
   private $file = $xml_path . $xml_path;
@@ -79,7 +80,7 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
     $dom = new DomDocument("1.0", "utf-8");
     $dom->formatOutput = true;
 
-    $root = $dom->createElement('fifthelement');
+    $root = $dom->createElement($this->name);
 
     $stamp = $dom->createElement('created_at', date('Y-m-d H:i') );
     $root->appendChild($stamp);
@@ -88,11 +89,11 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
     $root->appendChild($nodes);
 
     $nameAttribute = $dom->createAttribute('name');
-    $nameAttribute->value = 'Fifth Element - Adventure Store';
+    $nameAttribute->value = Mage::app()->getStore()->getFrontendName();
     $root->appendChild($nameAttribute);
 
     $urlAttribute = $dom->createAttribute('url');
-    $urlAttribute->value = 'http://www.fifthelement.gr';
+    $urlAttribute->value = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
     $root->appendChild($urlAttribute);
 
     $dom->appendChild($root);
