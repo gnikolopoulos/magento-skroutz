@@ -24,7 +24,13 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
     $this->xml_file_name = Mage::getStoreConfig('feed/feed/xml_file_name');
     $this->xml_path = Mage::getStoreConfig('feed/feed/feed_path');
     $this->file = $this->xml_path . $this->xml_file_name;
-    $this->excluded = explode(',', Mage::getStoreConfig('feed/feed/excluded_cats'));
+
+    $this->show_outofstock = Mage::getStoreConfig('feed/collection/show_unavailable');
+    $this->excluded = explode(',', Mage::getStoreConfig('feed/collection/excluded_cats'));
+
+    $this->instock_msg = Mage::getStoreConfig('feed/messages/in_stock');
+    $this->nostock_msg = Mage::getStoreConfig('feed/messages/out_of_stock');
+    $this->backorder_msg = Mage::getStoreConfig('feed/messages/backorder');
   }
 
   public function indexAction() {
@@ -136,13 +142,15 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
       )
     ); //skroutz products only
     $this->oProducts->addAttributeToSelect('*');
-    $this->oProducts->joinField('qty',
-                 'cataloginventory/stock_item',
-                 'qty',
-                 'product_id=entity_id',
-                 '{{table}}.stock_id=1',
-                 'left');
-    $this->oProducts->addAttributeToFilter('qty', array("gt" > 0));
+    if( $this->show_outofstock ) {
+      $this->oProducts->joinField('qty',
+                   'cataloginventory/stock_item',
+                   'qty',
+                   'product_id=entity_id',
+                   '{{table}}.stock_id=1',
+                   'left');
+      $this->oProducts->addAttributeToFilter('qty', array("gt" > 0));
+    }
     $this->oProdudctIds = $this->oProducts->getAllIds();
   }
 
@@ -177,8 +185,16 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
     $aData['link']=mb_substr($oProduct->getProductUrl(),0,299,'UTF-8');
     $aData['image_link_large']= mb_substr(Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).'catalog/product'.$oProduct->getImage(),0,399,'UTF-8');
 
-    $aData['stock']='Y';
-    $aData['stock_descrip']='Σε απόθεμα';
+    if( $oProduct->isAvailable() && $inventory->getBackorders() == 0 ) {
+      $aData['stock']='Y';
+      $aData['stock_descrip'] = $this->instock_msg;
+    } elseif( $oProduct->isAvailable() && $inventory->getBackorders() != 0 ) {
+      $aData['stock']='Y';
+      $aData['stock_descrip'] = $this->backorder_msg;
+    } elseif( !$oProduct->isAvailable() ) {
+      $aData['stock']='Y';
+      $aData['stock_descrip'] = $this->nostock_msg;
+    }
 
     $aData['categoryid'] = $aCats['cid'];
     $aData['category'] = $aCats['bread'];
