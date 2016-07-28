@@ -60,7 +60,9 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
         $product->appendChild ( $this->xml->createElement('id', $p['id']) );
         $product->appendChild ( $this->xml->createElement('mpn', $p['mpn']) );
         $product->appendChild ( $this->xml->createElement('manufacturer', $p['brand']) );
-        $product->appendChild ( $this->xml->createElement('name', $p['title']) );
+        
+        $name = $product->appendChild($this->xml->createElement('name'));
+        $name->appendChild($this->xml->createCDATASection( $p['title'] ));
 
         $description = $product->appendChild($this->xml->createElement('description'));
         $description->appendChild($this->xml->createCDATASection( $p['description'] ));
