@@ -2,7 +2,7 @@
 <config>
     <tabs>
         <id>
-            <label>Skroutz Feed</label>
+            <label>Product Feed</label>
             <sort_order>195</sort_order>
         </id>
     </tabs>
