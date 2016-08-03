@@ -13,6 +13,8 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
   private $xml;
   private $xmlContents;
 
+  private $attribute;
+
   private $BadChars = array('"',"\r\n","\n","\r","\t");
   private $ReplaceChars = array(""," "," "," ","");
 
@@ -24,6 +26,8 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
     $this->xml_file_name = Mage::getStoreConfig('feed/feed/xml_file_name');
     $this->xml_path = Mage::getStoreConfig('feed/feed/feed_path');
     $this->file = $this->xml_path . $this->xml_file_name;
+
+    $this->attribute = Mage::getStoreConfig('feed/feed/attribute');
 
     $this->show_outofstock = Mage::getStoreConfig('feed/collection/show_unavailable');
     $this->excluded = explode(',', Mage::getStoreConfig('feed/collection/excluded_cats'));
@@ -50,7 +54,7 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
       $oProduct = Mage::getModel('catalog/product');
       $oProduct ->load($iProduct);
       $stockItem = $oProduct->isAvailable();
-      $skroutz = $oProduct->getData('skroutz');
+      $skroutz = $oProduct->getData( $this->attribute );
       if($stockItem == 1 && $skroutz == 1) {
         $p = $this->getProductData($iProduct);
 
@@ -60,7 +64,7 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
         $product->appendChild ( $this->xml->createElement('id', $p['id']) );
         $product->appendChild ( $this->xml->createElement('mpn', $p['mpn']) );
         $product->appendChild ( $this->xml->createElement('manufacturer', $p['brand']) );
-        
+
         $name = $product->appendChild($this->xml->createElement('name'));
         $name->appendChild($this->xml->createCDATASection( $p['title'] ));
 
@@ -140,7 +144,7 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
     $this->oProducts->addAttributeToFilter('visibility', 4); //catalog, search
     $this->oProducts->addAttributeToFilter(
       array(
-        array('attribute'=>'skroutz', 'eq' => '1'),
+        array('attribute'=> $this->attribute, 'eq' => '1'),
       )
     ); //skroutz products only
     $this->oProducts->addAttributeToSelect('*');
@@ -186,6 +190,8 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
 
     $aData['link']=mb_substr($oProduct->getProductUrl(),0,299,'UTF-8');
     $aData['image_link_large']= mb_substr(Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).'catalog/product'.$oProduct->getImage(),0,399,'UTF-8');
+
+    $inventory =  Mage::getModel('cataloginventory/stock_item')->loadByProduct($oProduct);
 
     if( $oProduct->isAvailable() && $inventory->getBackorders() == 0 ) {
       $aData['stock']='Y';
