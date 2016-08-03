@@ -27,7 +27,7 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
     $this->xml_path = Mage::getStoreConfig('feed/feed/feed_path');
     $this->file = $this->xml_path . $this->xml_file_name;
 
-    $this->attribute = Mage::getStoreConfig('feed/feed/attribute');
+    $this->attribute = Mage::getStoreConfig('feed/collection/attribute');
 
     $this->show_outofstock = Mage::getStoreConfig('feed/collection/show_unavailable');
     $this->excluded = explode(',', Mage::getStoreConfig('feed/collection/excluded_cats'));
