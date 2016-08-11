@@ -148,7 +148,7 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
       )
     ); //skroutz products only
     $this->oProducts->addAttributeToSelect('*');
-    if( $this->show_outofstock ) {
+    if( !$this->show_outofstock ) {
       $this->oProducts->joinField('qty',
                    'cataloginventory/stock_item',
                    'qty',
