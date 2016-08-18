@@ -173,20 +173,12 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
 
     $aData['brand']=@mb_substr($oProduct->getResource()->getAttribute('manufacturer')->getFrontend()->getValue($oProduct),0,99,'UTF-8');
 
-    //if(isset($aData['brand']) && $aData['brand']!=''){
     $_finalPrice = $oProduct->getFinalPrice();
     $product_price = Mage::helper('tax')->getPrice($oProduct, $_finalPrice, true);
-    if( $product_price >= 60 && $product_price < 200 ) {
-      $aData['title']= $aData['brand'] . ' ' . mb_substr($oProduct->getName(),0,299,'UTF-8') . ' (Πληρωμή με 2 άτοκες δόσεις)';
-    } elseif( $product_price >= 200 ) {
-      $aData['title']= $aData['brand'] . ' ' . mb_substr($oProduct->getName(),0,299,'UTF-8') . ' (Πληρωμή με 4 άτοκες δόσεις)';
-    } else {
-      $aData['title']= $aData['brand'] . ' ' . mb_substr($oProduct->getName(),0,299,'UTF-8');
-    }
-    //$aData['title']=mb_substr($oProduct->getName(),0,299,'UTF-8');
+    $aData['title']= $aData['brand'] . ' ' . mb_substr($oProduct->getName(),0,299,'UTF-8');
 
     $aData['description']= strip_tags($oProduct->getShortDescription());
-    $aData['price'] = preg_replace('/,/', '.', Mage::helper('tax')->getPrice($oProduct, $_finalPrice, true));
+    $aData['price'] = preg_replace('/,/', '.', $product_price);
 
     $aData['link']=mb_substr($oProduct->getProductUrl(),0,299,'UTF-8');
     $aData['image_link_large']= mb_substr(Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).'catalog/product'.$oProduct->getImage(),0,399,'UTF-8');
