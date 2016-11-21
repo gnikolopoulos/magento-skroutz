@@ -86,7 +86,7 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
           $product->appendChild ( $this->xml->createElement('color', $p['color']) );
         }
 
-        if( $p['size'] != '' ) {
+        if( isset($p['size']) && $p['size'] != '' ) {
           $product->appendChild ( $this->xml->createElement('size', $p['size']) );
         }
 
