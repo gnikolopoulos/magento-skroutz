@@ -1,28 +1,47 @@
 <?xml version="1.0"?>
   <config>
     <modules>
-      <ID_Feed>
-        <version>0.0.1</version>
-      </ID_Feed>
+        <ID_Feed>
+            <version>0.0.1</version>
+        </ID_Feed>
     </modules>
 
     <frontend>
-      <routers>
-        <feed>
-          <use>standard</use>
-          <args>
-            <module>ID_Feed</module>
-            <frontName>feed</frontName>
-          </args>
-        </feed>
-      </routers>
+        <routers>
+            <feed>
+                <use>standard</use>
+                <args>
+                    <module>ID_Feed</module>
+                    <frontName>feed</frontName>
+                </args>
+            </feed>
+        </routers>
     </frontend>
-      
+
     <global>
-      <helpers>
-        <feed>
-          <class>ID_Feed_Helper</class>
-        </feed>
-      </helpers>
+        <models>
+            <feed>
+                <class>ID_Feed_Model</class>
+            </feed>
+        </models>
+
+        <helpers>
+            <feed>
+                <class>ID_Feed_Helper</class>
+            </feed>
+        </helpers>
     </global>
+
+    <crontab>
+        <jobs>
+            <feed>
+                <schedule>
+                    <cron_expr>* */2 * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>feed/observer::generate</model>
+                </run>
+            </feed>
+        </jobs>
+    </crontab>
   </config>
