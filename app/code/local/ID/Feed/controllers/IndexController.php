@@ -1,14 +1,9 @@
 <?php
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
 
 	private $oProducts;
 	private $oProdudctIds;
-	private $oProductModel;
 	private $store_name;
 	private $xml_file_name;
 	private $xml_path;
@@ -100,7 +95,7 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
 				array('attribute'=>'skroutz', 'eq' => '1'),
 			)
 		); //skroutz products only
-		$this->oProducts->addAttributeToSelect(['entity_id', 'skroutz','sku','name','manufacturer_value','final_price','short_description','url_path','small_image','color_value','type_id']);
+		$this->oProducts->addAttributeToSelect(['entity_id', 'skroutz','sku','name','manufacturer_value','final_price','short_description','url_path','small_image','color_value','type_id', 'image']);
 		if( !$this->show_outofstock ) {
 			$this->oProducts->joinField('qty',
 					'cataloginventory/stock_item',
@@ -111,6 +106,8 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
 				);
 			$this->oProducts->joinTable('cataloginventory/stock_item', 'product_id=entity_id', array('stock_status' => 'is_in_stock'));
 			$this->oProducts->addAttributeToFilter('stock_status', 1);
+			// alt
+			//$this->oProducts->joinTable('cataloginventory/stock_item', 'product_id=entity_id', array('*'), 'is_in_stock = 1');
 		}
 		$this->oProducts->addFinalPrice();
 
@@ -147,6 +144,18 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
 
 		$aData['link'] = mb_substr($this->base_url . $oProduct->url_path,0,299,'UTF-8');
 		$aData['image_link_large'] = mb_substr($this->media_url.$oProduct->small_image,0,399,'UTF-8');
+		
+		$attributes = $oProduct->getTypeInstance(true)->getSetAttributes($oProduct);
+    	$media_gallery = $attributes['media_gallery'];
+    	$backend = $media_gallery->getBackend();
+    	$backend->afterLoad($oProduct);
+    	$mediaGallery = $oProduct->getMediaGalleryImages();
+
+	  	foreach($oProduct->getMediaGalleryImages() as $image) {
+	    	if( $image->getPosition() != 1 ) {
+        		$aData['additional_imageurl'][] = $image->getUrl();
+      		}
+	  	}
 
 		if( $this->show_outofstock ) {
 			if( $oProduct->isAvailable() ) {
@@ -202,6 +211,13 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
 			$product->appendChild ( $this->xml->createElement('price', $p['price']) );
 			$product->appendChild ( $this->xml->createElement('link', $p['link']) );
 			$product->appendChild ( $this->xml->createElement('image', $p['image_link_large']) );
+			
+			if( $p['additional_imageurl'] ) {
+				foreach($p['additional_imageurl'] as $image) {
+					$product->appendChild ( $this->xml->createElement('additional_imageurl', $image) );
+				}
+			}
+			
 			$product->appendChild ( $this->xml->createElement('InStock', $p['stock']) );
 			$product->appendChild ( $this->xml->createElement('Availability', $p['stock_descrip']) );
 
