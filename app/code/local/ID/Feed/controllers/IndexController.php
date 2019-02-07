@@ -178,11 +178,14 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
 		if( $oProduct->type_id == 'configurable' ) {
 				unset($sizes);
 				$parent = Mage::getModel('catalog/product_type_configurable')->setProduct($oProduct);
-				$child = $parent->getUsedProductCollection()->addAttributeToSelect('*')->addFilterByRequiredOptions();
+				$child = $parent->getUsedProductCollection()->addAttributeToSelect('*');
+				if( !$this->show_outofstock ) {
+      				$child->joinTable('cataloginventory/stock_item', 'product_id=entity_id', array('*'), 'is_in_stock = 1');
+    			}
+				
 				foreach($child as $simple_product) {
-					$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($simple_product);
-					if( !in_array($simple_product->getResource()->getAttribute('size')->getFrontend()->getValue($simple_product), $this->notAllowed) && $stock->getQty() > 0 ) {
-						$sizes[] = $simple_product->getResource()->getAttribute('size')->getFrontend()->getValue($simple_product);
+					if( !in_array($simple_product->getAttributeText('size'), $this->notAllowed) ) {
+						$sizes[] = $simple_product->getAttributeText('size');
 					}
 				}
 				if( $sizes && count($sizes) > 0 ) {
