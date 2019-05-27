@@ -4,7 +4,6 @@ class ID_Feed_Model_Observer {
 
   private $oProducts;
   private $oProdudctIds;
-  private $oProductModel;
   private $store_name;
   private $xml_file_name;
   private $xml_path;
@@ -129,19 +128,25 @@ class ID_Feed_Model_Observer {
     $aData['brand'] = strtoupper( @mb_substr($oProduct->manufacturer_value,0,99,'UTF-8') );
 
     $_finalPrice = $oProduct->final_price;
-    if( $_finalPrice >= 60 && $_finalPrice < 200 ) {
-      $aData['title'] = $aData['brand'] . ' ' . mb_substr($oProduct->name,0,299,'UTF-8') . ' - ' . $aData['mpn'] . ' (Πληρωμή με 2 άτοκες δόσεις)';
-    } elseif( $_finalPrice >= 200 ) {
-      $aData['title'] = $aData['brand'] . ' ' . mb_substr($oProduct->name,0,299,'UTF-8') . ' - ' . $aData['mpn'] . ' (Πληρωμή με 4 άτοκες δόσεις)';
-    } else {
-      $aData['title'] = $aData['brand'] . ' ' . mb_substr($oProduct->name,0,299,'UTF-8') . ' - ' . $aData['mpn'];
-    }
+    $aData['title'] = @mb_substr($oProduct->name,0,299,'UTF-8');
 
     $aData['description']= strip_tags($oProduct->short_description);
     $aData['price'] = preg_replace('/,/', '.', Mage::helper('tax')->getPrice($oProduct, $_finalPrice, true));
 
     $aData['link'] = mb_substr($this->base_url . $oProduct->url_path,0,299,'UTF-8');
     $aData['image_link_large'] = mb_substr($this->media_url.$oProduct->small_image,0,399,'UTF-8');
+    
+    $attributes = $oProduct->getTypeInstance(true)->getSetAttributes($oProduct);
+      $media_gallery = $attributes['media_gallery'];
+      $backend = $media_gallery->getBackend();
+      $backend->afterLoad($oProduct);
+      $mediaGallery = $oProduct->getMediaGalleryImages();
+
+      foreach($oProduct->getMediaGalleryImages() as $image) {
+        if( $image->getPosition() != 1 ) {
+            $aData['additional_imageurl'][] = $image->getUrl();
+          }
+      }
 
     if( $this->show_outofstock ) {
       if( $oProduct->isAvailable() ) {
@@ -164,11 +169,14 @@ class ID_Feed_Model_Observer {
     if( $oProduct->type_id == 'configurable' ) {
         unset($sizes);
         $parent = Mage::getModel('catalog/product_type_configurable')->setProduct($oProduct);
-        $child = $parent->getUsedProductCollection()->addAttributeToSelect('*')->addFilterByRequiredOptions();
+        $child = $parent->getUsedProductCollection()->addAttributeToSelect('*');
+        if( !$this->show_outofstock ) {
+              $child->joinTable('cataloginventory/stock_item', 'product_id=entity_id', array('*'), 'is_in_stock = 1');
+          }
+        
         foreach($child as $simple_product) {
-          $stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($simple_product);
-          if( !in_array($simple_product->getResource()->getAttribute('size')->getFrontend()->getValue($simple_product), $this->notAllowed) && $stock->getQty() > 0 ) {
-            $sizes[] = $simple_product->getResource()->getAttribute('size')->getFrontend()->getValue($simple_product);
+          if( !in_array($simple_product->getAttributeText('size'), $this->notAllowed) ) {
+            $sizes[] = $simple_product->getAttributeText('size');
           }
         }
         if( $sizes && count($sizes) > 0 ) {
@@ -188,8 +196,8 @@ class ID_Feed_Model_Observer {
 
       $product->appendChild ( $this->xml->createElement('id', $p['id']) );
       $product->appendChild ( $this->xml->createElement('mpn', $p['mpn']) );
-      $product->appendChild ( $this->xml->createElement('manufacturer', $p['brand']) );
-      $product->appendChild ( $this->xml->createElement('name', ucwords(htmlspecialchars($p['title']))) );
+      $product->appendChild ( $this->xml->createElement('manufacturer', htmlspecialchars($p['brand'])) );
+      $product->appendChild ( $this->xml->createElement('name', htmlspecialchars($p['title'])) );
 
       $description = $product->appendChild($this->xml->createElement('description'));
       $description->appendChild($this->xml->createCDATASection( $p['description'] ));
@@ -197,6 +205,13 @@ class ID_Feed_Model_Observer {
       $product->appendChild ( $this->xml->createElement('price', $p['price']) );
       $product->appendChild ( $this->xml->createElement('link', $p['link']) );
       $product->appendChild ( $this->xml->createElement('image', $p['image_link_large']) );
+      
+      if( $p['additional_imageurl'] ) {
+        foreach($p['additional_imageurl'] as $image) {
+          $product->appendChild ( $this->xml->createElement('additional_imageurl', $image) );
+        }
+      }
+      
       $product->appendChild ( $this->xml->createElement('InStock', $p['stock']) );
       $product->appendChild ( $this->xml->createElement('Availability', $p['stock_descrip']) );
 
