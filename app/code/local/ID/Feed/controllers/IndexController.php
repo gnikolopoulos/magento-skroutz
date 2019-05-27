@@ -131,13 +131,7 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
 		$aData['brand'] = strtoupper( @mb_substr($oProduct->manufacturer_value,0,99,'UTF-8') );
 
 		$_finalPrice = $oProduct->final_price;
-		if( $_finalPrice >= 60 && $_finalPrice < 200 ) {
-			$aData['title'] = $aData['brand'] . ' ' . mb_substr($oProduct->name,0,299,'UTF-8') . ' - ' . $aData['mpn'] . ' (Πληρωμή με 2 άτοκες δόσεις)';
-		} elseif( $_finalPrice >= 200 ) {
-			$aData['title'] = $aData['brand'] . ' ' . mb_substr($oProduct->name,0,299,'UTF-8') . ' - ' . $aData['mpn'] . ' (Πληρωμή με 4 άτοκες δόσεις)';
-		} else {
-			$aData['title'] = $aData['brand'] . ' ' . mb_substr($oProduct->name,0,299,'UTF-8') . ' - ' . $aData['mpn'];
-		}
+		$aData['title'] = @mb_substr($oProduct->name,0,299,'UTF-8');
 
 		$aData['description']= strip_tags($oProduct->short_description);
 		$aData['price'] = preg_replace('/,/', '.', Mage::helper('tax')->getPrice($oProduct, $_finalPrice, true));
@@ -205,8 +199,8 @@ class ID_Feed_IndexController extends Mage_Core_Controller_Front_Action {
 
 			$product->appendChild ( $this->xml->createElement('id', $p['id']) );
 			$product->appendChild ( $this->xml->createElement('mpn', $p['mpn']) );
-			$product->appendChild ( $this->xml->createElement('manufacturer', $p['brand']) );
-			$product->appendChild ( $this->xml->createElement('name', ucwords(htmlspecialchars($p['title']))) );
+			$product->appendChild ( $this->xml->createElement('manufacturer', htmlspecialchars($p['brand'])) );
+			$product->appendChild ( $this->xml->createElement('name', htmlspecialchars($p['title'])) );
 
 			$description = $product->appendChild($this->xml->createElement('description'));
 			$description->appendChild($this->xml->createCDATASection( $p['description'] ));
